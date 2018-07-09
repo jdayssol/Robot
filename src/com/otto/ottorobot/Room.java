@@ -9,7 +9,7 @@ public class Room {
 		super();
 		this.width = width;
 		this.height = height;
-		this.tiles = tiles; 
+		this.tiles = tiles;  
 	}
 
 	public int getWidth() {
