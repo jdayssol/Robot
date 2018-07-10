@@ -131,6 +131,34 @@ public class RobotTest {
 		myrobot.displayRoom();
 	}
 	
+	@Test
+	public void checkGoalFound() throws RobotException
+	{
+		Robot myrobot = new Robot(7,7, "N");			
+		Room myroom = new Room(room);
+
+		String[] goal = {"7","7"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		Assert.assertEquals(myrobot.checkGoal(),true);
+		myrobot.displayRoom();
+	}
+	
+	@Test
+	public void checkGoalNotFound() throws RobotException
+	{
+		Robot myrobot = new Robot(6,6, "N");			
+		Room myroom = new Room(room);
+
+		String[] goal = {"7","7"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		Assert.assertEquals(myrobot.checkGoal(),false);
+		myrobot.displayRoom();
+	}
+	
 	@Test (expected = RobotException.class)
     public void setGoalInAObstacle() throws NumberFormatException, RobotException {		
 		Robot myrobot = new Robot(2,2,"N");		

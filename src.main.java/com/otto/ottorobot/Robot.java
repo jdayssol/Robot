@@ -132,7 +132,7 @@ public class Robot {
 	}
 	
 	protected boolean checkGoal(){
-		if(goal != null && this.col==this.goal[0] && this.row==this.goal[1])
+		if(goal != null && this.row==this.goal[0] && this.col==this.goal[1])
         {
         	return true;
         }
@@ -156,6 +156,8 @@ public class Robot {
         }
         return false;
     }
+	
+	
 	
 	private void controlCoordonate(int row, int col) throws RobotException
 	{
