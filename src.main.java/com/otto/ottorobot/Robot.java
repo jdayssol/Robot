@@ -20,13 +20,14 @@ public class Robot {
     public static final String WEST = "W";
     
     /**
-     * Coordonate X - horizontal.
-     */   
-	private int x;
-	/**
-     * Coordonate Y - vertical.
+     * Coordonate X - Place of the robot in the rows.
      */ 
-	private int y;
+	private int row;
+    /**
+     * Coordonate Y -  Place of the robot in the cols.
+     */   
+	private int col;
+	
 	/**
 	 * The direction of the robot.
 	 */
@@ -36,35 +37,53 @@ public class Robot {
 	
 	private int[] goal;
 	
-	public Robot(int x, int y, String direction) {
+	public Robot(int x, int y, String direction) throws RobotException {
 		super();
-		this.x = x;
-		this.y = y;
-		this.direction = direction;
+		if(x > -1 && y > -1)
+		{
+			this.row = x;
+			this.col = y;			
+		}else throw new RobotException("Bad number");
+		if(direction.matches("[NESW]"))
+		{
+			this.direction = direction;
+		}else throw new RobotException("Bad direction");
+		
 	}
 	
-	public void placeRobot(Room room)
+	public void placeRobot(Room room) throws RobotException
 	{
 		this.room = room;
-		this.x= room.flipCol(x);
+		
+		this.row= room.flipRow(row);
+		controlCoordonate(this.row,this.col);
+		System.out.println("Robot placé a X : " + row + ", Y : " + col + " se trouve sur la case " + room.getFieldAt(row,col));
 	}
-	
-	public void setGoal(Room room,String[] goal)
+		
+	public void setGoal(Room room,String[] goal) throws NumberFormatException, RobotException
 	{
 		this.room = room;
 		this.goal = new int[2];
-		this.goal[0] = room.flipCol(Integer.parseInt(goal[0]));
+		this.goal[0] = room.flipRow(Integer.parseInt(goal[0]));
 		this.goal[1] = Integer.parseInt(goal[1]);	
+		controlCoordonate(this.goal[0],this.goal[1]);
 	}
 	
 	public void displayRoom()
 	{
+		System.out.println();
 		System.out.println("Room:");
-		for(int i = 0; i<room.getNrows(); i++)
+		for(int i = 0; i<room.getNbRows(); i++)
 		{
-			for(int j=0; j< room.getNcols();j++)
+			for(int j=0; j< room.getNbCols();j++)
 			{
-				if(i==x && j==y) System.out.print("R");
+				if(i==row && j==col) 
+					{
+					if(this.direction.equals(NORTH)) System.out.print("^");
+					else if(direction.equals(EAST)) System.out.print(">");
+					else if(direction.equals(SOUTH)) System.out.print("v");
+					else if(direction.equals(WEST)) System.out.print("<");
+					}
 				else if(goal != null && i==goal[0] && j==goal[1]) System.out.print("G");
 				else if(room.getFieldAt(i,j).isBlocked()) System.out.print("X");
 				else System.out.print("O");
@@ -72,30 +91,48 @@ public class Robot {
 			}
 			System.out.println("");
 		}
+		System.out.println();
 	}
 	
-	protected void moveRobot() {
+	protected void move() {
 		if(detectObstacle()){
-			int nextX=x;
-			int nextY=y;
+			int nextX=row;
+			int nextY=col;
 			if(this.direction.equals(NORTH)) nextX--;
 			else if(direction.equals(EAST)) nextY++;
 			else if(direction.equals(SOUTH)) nextX++;
 			else if(direction.equals(WEST)) nextY--;
 			
-	        if(nextX< room.getNrows() && nextY<room.getNcols())
+	        if(nextX< room.getNbRows() && nextY<room.getNbCols())
 	        {
-	        	if(!room.getFieldAt(x,y).isBlocked())
+	        	if(!room.getFieldAt(row,col).isBlocked())
 	        	{
-	        		x = nextX;
-	        		y = nextY;
+	        		row = nextX;
+	        		col = nextY;
+	        		System.out.print("F");
 	        	}
 	        }
 		}       
     }
 	
+	protected void turnLeft() {
+		if(this.direction.equals(NORTH)) this.direction=WEST;
+		else if(direction.equals(WEST)) this.direction=SOUTH;
+		else if(direction.equals(SOUTH)) this.direction=EAST;
+		else if(direction.equals(EAST)) this.direction=NORTH;
+		System.out.print("L");
+	}
+	
+	protected void turnRight() {
+		if(this.direction.equals(NORTH)) this.direction=EAST;
+		else if(direction.equals(EAST)) this.direction=SOUTH;
+		else if(direction.equals(SOUTH)) this.direction=WEST;
+		else if(direction.equals(WEST)) this.direction=NORTH;
+		System.out.print("R");	
+	}
+	
 	protected boolean checkGoal(){
-		if(goal != null && this.x==this.goal[0] && this.y==this.goal[1])
+		if(goal != null && this.col==this.goal[0] && this.row==this.goal[1])
         {
         	return true;
         }
@@ -103,16 +140,16 @@ public class Robot {
 	}
 	
 	protected boolean detectObstacle() {
-		int nextX=x;
-		int nextY=y;
+		int nextX=row;
+		int nextY=col;
 		if(this.direction.equals(NORTH)) nextX--;
 		else if(direction.equals(EAST)) nextY++;
 		else if(direction.equals(SOUTH)) nextX++;
 		else if(direction.equals(WEST)) nextY--;
 		
-        if(nextX< room.getNrows() && nextY<room.getNcols())
+        if(nextX< room.getNbRows() && nextY<room.getNbCols())
         {
-        	if(!room.getFieldAt(x,y).isBlocked())
+        	if(!room.getFieldAt(row,col).isBlocked())
         	{
         		return true;
         	}
@@ -120,24 +157,33 @@ public class Robot {
         return false;
     }
 	
-	public int getX() {
-		return x;
-	}
-	public void setX(int x) {
-		this.x = x;
-	}
-	public int getY() {
-		return y;
-	}
-	public void setY(int y) {
-		this.y = y;
+	private void controlCoordonate(int row, int col) throws RobotException
+	{
+		if(col> room.getNbCols()-1 )
+		{
+			throw new RobotException("Coordonate out of the room Y :"+ col +" Room nbCols : " + room.getNbCols());
+			
+		}
+		if(row > room.getNbRows()-1)
+		{
+			throw new RobotException("Coordonate out of the room X : "+ row +" Room nbRows : " + room.getNbRows());
+		}
+		if(room.getFieldAt(row,col).isBlocked())
+		{
+			throw new RobotException("Robot or goal can't be place here, there is a obstacle");
+		}
 	}
 	
+	public int getCol() {
+		return col;
+	}
+
+	public int getRow() {
+		return row;
+	}
+
 	public String getDirection() {
 		return direction;
-	}
-	public void setDirection(String direction) {
-		this.direction = direction;
 	}
 
 	public int[] getGoal() {

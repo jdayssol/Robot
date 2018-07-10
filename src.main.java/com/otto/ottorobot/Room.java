@@ -1,54 +1,61 @@
 package com.otto.ottorobot;
 
 public class Room {
-	private int nrows;
-	private int ncols;
+	private int nbRows;
+	private int nbCols;
 	private Field[][] fields;
 
-	public Room(int nrows, int ncols, String[][] room) {
-		super();
-		this.ncols = ncols;
-		this.nrows = nrows;
-		Field[][] fields = new Field[nrows][ncols];
-		for (int i = 0; i < room.length; i++) {
-			for (int j = 0; j < room[i].length; j++) {
-				fields[i][j] = new Field();
-				if (room[i][j].equals("X")) {
-					fields[i][j].setBlocked(true);
+	public Room(String[][] room){
+		this.nbRows = room.length;
+		this.nbCols = room[0].length;
+		Field[][] fields = new Field[nbRows][nbCols];
+		for (int i = 0; i < nbRows; i++) {
+			for (int j = 0; j < nbCols; j++) {				
+				if(room[i][j].equals("X")){
+					fields[i][j] = new Field(room[i][j],true);
+				}else{
+					fields[i][j] = new Field(room[i][j],false);
 				}
 			}
 		}
 		this.fields = fields;
+	}
+	
+	public Room(int nrows, int ncols, Field[][] tiles) {
+		this.nbRows = nrows;
+		this.nbCols = ncols;
+		this.fields = tiles;
 	}
 
 	public Field getFieldAt(int row, int col) {
 		return fields[row][col];
 	}
 
-	public int flipCol(int col) {
-		return this.ncols - 1 - col;
+	public int flipCol(int col) throws RobotException {
+		if(col > this.getNbCols()-1)
+		{
+			throw new RobotException("Coordonate out of the room Y : "+ col +" Room nbCols : " + this.getNbCols());
+		}
+		return this.nbCols - 1 - col;
 	}
 
-	public int flipRow(int row) {
-		return this.nrows - 1 - row;
-	}
-
-	public Room(int nrows, int ncols, Field[][] tiles) {
-		super();
-		this.nrows = nrows;
-		this.ncols = ncols;
-		this.fields = tiles;
+	public int flipRow(int row) throws RobotException {
+		if(row > this.getNbRows()-1)
+		{
+			throw new RobotException("Coordonate out of the room X : "+ row +" Room nbRows : " + this.getNbRows());
+		}
+		return this.nbRows - 1 - row;
 	}
 
 	public Field[][] getFields() {
 		return fields;
 	}
 
-	public int getNrows() {
-		return nrows;
+	public int getNbRows() {
+		return nbRows;
 	}
 
-	public int getNcols() {
-		return ncols;
+	public int getNbCols() {
+		return nbCols;
 	}
 }
