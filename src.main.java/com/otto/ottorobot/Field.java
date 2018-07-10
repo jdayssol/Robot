@@ -1,11 +1,13 @@
 package com.otto.ottorobot;
 
-public class Tile {
-	private boolean isBlocked;
+/**
+ * Represents a division of a Room
+ * @author jdayssol
+ *
+ */
+public class Field {
+	private boolean isBlocked = false;
 
-	public Tile(boolean isBlocked) {
-		this.isBlocked = isBlocked;
-	}
 	public boolean isBlocked() {
 		return isBlocked;
 	}	
