@@ -103,13 +103,22 @@ public class RobotTest {
 		myrobot.placeRobot(myroom);
 	}
 	
-	
-	@Test (expected = RobotException.class)
-    public void setGoal() throws NumberFormatException, RobotException {		
-		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
-			
+	@Test 
+    public void displayRoom() throws NumberFormatException, RobotException {		
+		Robot myrobot = new Robot(0,0, "W");			
 		Room myroom = new Room(room);
-
+		myrobot.placeRobot(myroom);
+		myrobot.displayRoom();
+		
+		Assert.assertEquals(7,myrobot.getRow());
+		Assert.assertEquals(0,myrobot.getCol());
+		Assert.assertEquals("W",myrobot.getDirection());
+	}
+	
+	@Test 
+    public void setGoal() throws NumberFormatException, RobotException {		
+		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);			
+		Room myroom = new Room(room);
 		String[] goal = {"7","7"};
 		
 		myrobot.setGoal(myroom, goal);
@@ -120,7 +129,7 @@ public class RobotTest {
 		myrobot.displayRoom();
 	}
 	
-	@Test
+	@Test (expected = RobotException.class)
     public void setGoalOutOfBounds() throws NumberFormatException, RobotException {		
 		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);			
 		Room myroom = new Room(room);
@@ -196,27 +205,54 @@ public class RobotTest {
 	}
 
 	@Test
-    public void turnRobot() throws NumberFormatException, RobotException {
+    public void rotateLeftOrRight() throws NumberFormatException, RobotException {
 		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
 
-		myrobot.turnLeft();	
+		myrobot.rotateLeft();	
 		Assert.assertEquals("W",myrobot.getDirection());
-		myrobot.turnLeft();
+		myrobot.rotateLeft();
 		Assert.assertEquals("S",myrobot.getDirection());
-		myrobot.turnLeft();	
+		myrobot.rotateLeft();	
 		Assert.assertEquals("E",myrobot.getDirection());
-		myrobot.turnLeft();
+		myrobot.rotateLeft();
 		Assert.assertEquals("N",myrobot.getDirection());
 		
-		myrobot.turnRight();
+		myrobot.rotateRight();
 		Assert.assertEquals("E",myrobot.getDirection());
-		myrobot.turnRight();
+		myrobot.rotateRight();
 		Assert.assertEquals("S",myrobot.getDirection());
-		myrobot.turnRight();
+		myrobot.rotateRight();
 		Assert.assertEquals("W",myrobot.getDirection());
-		myrobot.turnRight();
+		myrobot.rotateRight();
 		Assert.assertEquals("N",myrobot.getDirection());
 	}
+	
+	@Test
+    public void rotateWithDirection() throws NumberFormatException, RobotException {
+		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), Robot.NORTH);
+
+		myrobot.rotate(Robot.WEST);	
+		Assert.assertEquals(Robot.WEST,myrobot.getDirection());
+		System.out.println("");
+		myrobot.rotate(Robot.EAST);
+		Assert.assertEquals(Robot.EAST,myrobot.getDirection());
+		System.out.println("");
+		myrobot.rotate(Robot.SOUTH);
+		Assert.assertEquals(Robot.SOUTH,myrobot.getDirection());
+		System.out.println("");
+		myrobot.rotate("?");
+		Assert.assertEquals(Robot.SOUTH,myrobot.getDirection());
+		System.out.println("");
+		myrobot.rotate(Robot.NORTH);
+		Assert.assertEquals(Robot.NORTH,myrobot.getDirection());
+		System.out.println("");
+		myrobot.rotate(Robot.SOUTH);
+		Assert.assertEquals(Robot.SOUTH,myrobot.getDirection());
+		System.out.println("");
+		myrobot.rotate(Robot.NORTH);
+		Assert.assertEquals(Robot.NORTH,myrobot.getDirection());
+	}
+	
 	
 	@Test
     public void manyMoveRobot() throws NumberFormatException, RobotException {	
@@ -249,7 +285,7 @@ public class RobotTest {
 		Assert.assertEquals(0,myrobot.getCol());
 		Assert.assertEquals("N",myrobot.getDirection());
 		
-		myrobot.turnRight();
+		myrobot.rotateRight();
 		myrobot.move();
 		myrobot.displayRoom();
 		
@@ -257,6 +293,56 @@ public class RobotTest {
 		Assert.assertEquals(1,myrobot.getCol());
 		Assert.assertEquals("E",myrobot.getDirection());
 		
+		myrobot.displayRoute();
 	}
 	
+	@Test
+    public void navigateSmallRoom() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
+		String[][] room ={
+		{"X","O"},
+		{"O","O"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"1","1"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		if(myrobot.navigate(myrobot.getRow(), myrobot.getCol(),myrobot.getDirection())){
+			System.out.println("a way is found");
+			myrobot.displayRoute();
+		}else{
+			System.out.println("No way to goal exist");
+		}
+	}
+	
+	@Test
+    public void navigate() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
+		String[][] room ={
+		{"O","O","O","O","O","O","O","O"},
+		{"O","O","O","O","O","O","O","O"},
+		{"O","X","X","O","O","O","O","O"},
+		{"O","O","X","O","O","O","O","O"},
+		{"X","O","X","O","O","O","O","O"},
+		{"O","O","X","O","O","O","O","O"},
+		{"O","O","X","O","O","O","O","O"},
+		{"O","O","X","O","O","O","O","O"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"7","7"};
+		
+		myrobot.placeRobot(myroom);
+		
+		Assert.assertEquals(7,myrobot.getRow());
+		Assert.assertEquals(0,myrobot.getCol());
+		
+		myrobot.setGoal(myroom, goal);
+		if(myrobot.navigate(myrobot.getRow(), myrobot.getCol(),myrobot.getDirection())){
+			System.out.println("a way is found");
+			myrobot.displayRoute();
+		}else{
+			System.out.println("No way to goal exist");
+		}
+	}
 }

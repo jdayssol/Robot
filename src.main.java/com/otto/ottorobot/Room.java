@@ -27,7 +27,7 @@ public class Room {
 		this.fields = tiles;
 	}
 
-	public Field getFieldAt(int row, int col) {
+	public Field getField(int row, int col) {
 		return fields[row][col];
 	}
 
