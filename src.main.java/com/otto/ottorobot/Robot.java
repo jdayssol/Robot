@@ -182,8 +182,6 @@ public class Robot {
 		if (checkGoal(row, col)){
 			return true;
 		}
-		// Display the room
-		displayRoom();
 		if (row > this.getGoal()[0] && (row - 1) >= 0 && room.getField(row - 1, col).isNotBlockedOrMarked()) {
 			// Try North
 			if (navigate(row - 1, col, Direction.NORTH)) return true;
@@ -201,7 +199,6 @@ public class Robot {
 
 		// No way, we remove the mark and try another path.
 		setMarked(false);
-		displayRoom();
 		return false;
 	}
 		
