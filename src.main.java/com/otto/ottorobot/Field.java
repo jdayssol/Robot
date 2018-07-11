@@ -8,11 +8,18 @@ package com.otto.ottorobot;
 public class Field {
 	private String content = "";
 	private boolean isBlocked = false;
+	private boolean isMarked = false;
 	
 	public Field(String content, boolean isBlocked) {
 		super();
 		this.content = content;
 		this.isBlocked = isBlocked;
+	}
+	
+	public boolean isNotBlockedOrMarked()
+	{
+		if(!isBlocked && !isMarked) return true;
+		return false;
 	}
 
 	public boolean isBlocked() {
@@ -31,4 +38,12 @@ public class Field {
     public String toString() {
         return content;
     }
+
+	public boolean isMarked() {
+		return isMarked;
+	}
+
+	public void setMarked(boolean isMarked) {
+		this.isMarked = isMarked;
+	}
 }
