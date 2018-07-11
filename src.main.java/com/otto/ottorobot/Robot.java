@@ -59,11 +59,10 @@ public class Robot {
 	
 	public void placeRobot(Room room) throws RobotException
 	{
-		this.room = room;
-		
+		this.room = room;		
 		this.row= room.flipRow(row);
 		controlCoordonate(this.row,this.col);
-		System.out.println("Robot is at row : " + row + ", col : " + col + " : " + room.getField(row,col));
+		System.out.println("Robot is placed at row : " + row + ", col : " + col + " : " + room.getField(row,col));
 	}
 		
 	public void setGoal(Room room,String[] goal) throws NumberFormatException, RobotException
@@ -115,19 +114,12 @@ public class Robot {
 	}
 	
 	public void displayRoute(){
-		
-		ListIterator<String> iteratorReverse = getRoute().listIterator(getRoute().size());
-		while(iteratorReverse.hasPrevious()){
-			   String item = iteratorReverse.previous();
-			   System.out.print(item);
-			}
-		/* 
 		ListIterator<String> iterator = getRoute().listIterator();
 		while(iterator.hasNext()){
 			   String item = iterator.next();
 			   System.out.print(item);
 			}
-			*/
+			
 	}
 	
 	protected void move() {
@@ -158,11 +150,8 @@ public class Robot {
     }
 	
 	protected void move(String nextdirection) {
-		direction=nextdirection;
-		if(detectWallOrObstacle()){
 		rotate(nextdirection);
 		move();       
-		}
     }
 	
 	protected void rotateLeft() {
@@ -286,6 +275,14 @@ public class Robot {
 		return false;
 	}
 	
+	protected boolean checkGoal(int row,int col){
+		if(goal != null && row==this.goal[0] && col==this.goal[1])
+        {
+        	return true;
+        }
+		return false;
+	}
+	
 	protected boolean checkMarked(){
 		if(room.getField(row, col).isMarked())
         {
@@ -316,8 +313,15 @@ public class Robot {
         return false;
     }
 	
-	protected boolean detectWallOrObstacleHere() {
-        if(row>=0 && row< room.getNbRows() && col>=0 && col<room.getNbCols())
+	protected boolean detectWallOrObstacle(String direction) {
+		int nextX=row;
+		int nextY=col;
+		if(direction.equals(NORTH)) nextX--;
+		else if(direction.equals(EAST)) nextY++;
+		else if(direction.equals(SOUTH)) nextX++;
+		else if(direction.equals(WEST)) nextY--;
+		
+        if(nextX>=0 && nextX< room.getNbRows() && nextY>=0 && nextY<room.getNbCols())
         {
         	if(!room.getField(row,col).isBlocked())
         	{
@@ -329,18 +333,19 @@ public class Robot {
 	
 
 	public boolean navigate(int row,int col,String direction) throws InterruptedException {
-		//move(direction);
 		
-		this.row=row;
-		this.col=col;
-		this.direction=direction;
-		
-		// The goal is found , we return true.
-		if (checkGoal()) return true;
 
 		// If we are outside of the room, we return false.
-		if(!detectWallOrObstacleHere())return false;
+		if(!detectWallOrObstacle(direction))return false;
 
+		if(this.row != row || this.col != col)
+		{
+			move(direction);
+		}
+		
+		// The goal is found , we return true.
+		if (checkGoal(row,col)) return true;
+	
 		// Si on tombe sur un mur ou un caillou, on revient sur nos pas.
 		// On revient sur nos pas en disant, par là c'est pas bon!
 		if (checkMarked()) return false;

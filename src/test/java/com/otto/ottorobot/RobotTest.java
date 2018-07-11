@@ -14,7 +14,7 @@ public class RobotTest {
 		
 		room = new String[][]{
 				{"A","B","C","D","E","F","G","H"},
-				{"I","J","K","L","M","N","O","P"},
+				{"I","J","K","L","m","N","O","P"},
 				{"Q","X","X","R","S","T","U","V"},
 				{"W","Y","X","Z","1","2","3","4"},
 				{"X","5","X","6","7","8","9","a"},
@@ -298,7 +298,7 @@ public class RobotTest {
 	
 	@Test
     public void navigateSmallRoom() throws NumberFormatException, RobotException, InterruptedException {	
-		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
+		Robot myrobot = new Robot(0,0,"N");
 		String[][] room ={
 		{"X","O"},
 		{"O","O"}};
@@ -308,6 +308,8 @@ public class RobotTest {
 		
 		myrobot.placeRobot(myroom);
 		myrobot.setGoal(myroom, goal);
+		
+		myrobot.displayRoom();
 		if(myrobot.navigate(myrobot.getRow(), myrobot.getCol(),myrobot.getDirection())){
 			System.out.println("a way is found");
 			myrobot.displayRoute();
@@ -339,10 +341,10 @@ public class RobotTest {
 		
 		myrobot.setGoal(myroom, goal);
 		if(myrobot.navigate(myrobot.getRow(), myrobot.getCol(),myrobot.getDirection())){
-			System.out.println("a way is found");
+			System.out.println("A way is found");
 			myrobot.displayRoute();
 		}else{
-			System.out.println("No way to goal exist");
+			System.out.println("No way exists");
 		}
 	}
 }
