@@ -124,6 +124,14 @@ public class Robot {
 		}
 	}
 	
+	public void displayRouteInverse() {
+		ListIterator<String> iterator = getRoute().listIterator(getRoute().size());
+		while (iterator.hasPrevious()) {
+			String item = iterator.previous();
+			System.out.print(item);
+		}
+	}
+	
 	public String getRouteAsString() {
 		StringBuffer route = new StringBuffer();
 		ListIterator<String> iterator = getRoute().listIterator();
@@ -141,26 +149,39 @@ public class Robot {
 	 * The function that at a given point tries all	 * possibilities (left, right, up, down),
 	 * leaving a mark to avoid looping to infinity in the labyrinth. 
 	 * If we find a pebble or a wall we abandon and return to the previous situation from which we try another choice.
-	 * 
+	 *
 	 * @param row
 	 * @param col
 	 * @param direction
 	 * @return true is a path is found, or else false
 	 * @throws InterruptedException
 	 */
+	
 	protected boolean navigate(int row, int col, Direction direction) throws InterruptedException {
-		
+
 		// Move to the next case, if it is different than the current.
-		if (this.row != row || this.col != col) move(direction);
+		if (this.row != row || this.col != col) {
+			move(direction);
+		}
+				
+		// If this case is marked, return false.
+		if (checkMarked())
+			{
+			return false;
+			}
+		
+		// If this case is marked, return false.
+		if (row <0 || row < 0 || row> (this.room.getNbRows()-1) || col >(this.room.getNbCols()-1))
+			{
+			return false;
+			}
+				
+		setMarked(true);
 
 		// The goal is found , we return true.
-		if (checkGoal(row, col)) return true;
-			
-		// If this case is marked, return false.
-		if (checkMarked()) return false;
-
-		// Case clean, unexplore, we pose a mark.
-		setMarked(true);
+		if (checkGoal(row, col)){
+			return true;
+		}
 		// Display the room
 		displayRoom();
 		if (row > this.getGoal()[0] && (row - 1) >= 0 && room.getField(row - 1, col).isNotBlockedOrMarked()) {
@@ -183,7 +204,7 @@ public class Robot {
 		displayRoom();
 		return false;
 	}
-
+		
 	protected void move() {
 		if (detectWallOrObstacle(this.directionEnum)) {
 			switch (directionEnum) {
@@ -336,6 +357,12 @@ public class Robot {
 		return false;
 	}
 
+	protected boolean checkMarked(int row,int col) {
+		if (room.getField(row, col).isMarked())
+			return true;
+		return false;
+	}
+	
 	protected boolean checkMarked() {
 		if (room.getField(row, col).isMarked())
 			return true;

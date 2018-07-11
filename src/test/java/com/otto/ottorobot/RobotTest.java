@@ -318,7 +318,7 @@ public class RobotTest{
 		}else{
 			System.out.println("No way to goal exist");
 		}
-		Assert.assertEquals("LFRF", myrobot.getRoute());
+		Assert.assertEquals("RFLF",myrobot.getRouteAsString());
 	}
 	
 	@Test
@@ -348,8 +348,42 @@ public class RobotTest{
 			System.out.println("A way is found");
 			myrobot.displayRoute();
 		}else{
+			myrobot.getRoute().clear();
 			System.out.println("No way exists");
 		}
 		Assert.assertEquals("FFRFLFFLFRFFFRFFFFFFF", myrobot.getRouteAsString());
+	}
+	
+	@Test
+    public void navigateNoSolution() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
+
+		String[][] room ={
+		{"O","X","O","O","O","O","O","O"},
+		{"O","X","O","O","O","O","O","O"},
+		{"O","X","X","O","O","O","O","O"},
+		{"O","O","X","O","O","O","O","O"},
+		{"X","O","X","O","O","O","O","O"},
+		{"O","O","X","O","O","O","O","O"},
+		{"O","O","X","O","O","O","O","O"},
+		{"O","O","X","O","O","O","O","O"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"7","7"};
+		
+		myrobot.placeRobot(myroom);
+		
+		Assert.assertEquals(7,myrobot.getRow());
+		Assert.assertEquals(0,myrobot.getCol());
+		
+		myrobot.setGoal(myroom, goal);
+		if(myrobot.navigate(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
+			System.out.println("A way is found");
+			myrobot.displayRoute();
+		}else{
+			myrobot.getRoute().clear();
+			System.out.println("No way exists");
+		}
+		Assert.assertEquals("", myrobot.getRouteAsString());
 	}
 }
