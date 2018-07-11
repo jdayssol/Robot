@@ -3,426 +3,371 @@ package com.otto.ottorobot;
 import java.util.ListIterator;
 import java.util.Stack;
 
+import com.otto.fw.Direction;
+
 public class Robot {
 
-    /**
-     * The heading a robot has when facing north.
-     */
-    public static final String NORTH = "N";
-    /**
-     * The heading a robot has when facing east.
-     */ 
-    public static final String EAST = "E";
-    /**
-     * The heading a robot has when facing south.
-     */    
-    public static final String SOUTH = "S";
-    /**
-     * The heading a robot has when facing west.
-     */    
-    public static final String WEST = "W";
-    
-    /**
-     * Coordonate X - Place of the robot in the rows.
-     */ 
+	/** Robot's place on the rows */
 	private int row;
-    /**
-     * Coordonate Y -  Place of the robot in the cols.
-     */   
+	/** Robot's place on the columns */
 	private int col;
-	
-	
+
+	/** The route from the robot start to the goal */
 	private Stack<String> route;
-	
-	/**
-	 * The direction of the robot.
-	 */
-	private String direction;
-	
+
+	/** Cardinal direction */
+	private Direction directionEnum;
+
 	private Room room;
-	
+
 	private int[] goal;
-	
+
 	public Robot(int row, int col, String direction) throws RobotException {
 		super();
-		if(row > -1 && col > -1)
-		{
+		if (row > -1 && col > -1) {
 			this.row = row;
-			this.col = col;			
-		}else throw new RobotException("Bad number");
-		if(direction.matches("[NESW]"))
-		{
-			this.direction = direction;
-		}else throw new RobotException("Bad direction");
+			this.col = col;
+		} else
+			throw new RobotException("Bad number");
+		if (direction.matches("[NESW]") || direction.matches("NORTH|SOUTH|EAST|WEST")) {
+			this.directionEnum = Direction.getDirection(direction);
+		} else
+			throw new RobotException("Bad direction");
 		route = new Stack<>();
 	}
-	
-	public void placeRobot(Room room) throws RobotException
-	{
-		this.room = room;		
-		this.row= room.flipRow(row);
-		controlCoordonate(this.row,this.col);
-		System.out.println("Robot is placed at row : " + row + ", col : " + col + " : " + room.getField(row,col));
+
+	/**
+	 * Place the robot in the correct place in the room. If the robot is placed
+	 * outside the room, or in a wall, return a RobotException According to the
+	 * statement, the coordonate of the robot is (0,0), so in a grid it's will
+	 * be on the top left Therefore it must be placed at bottom left. So I flip
+	 * the row of the robot.
+	 * 
+	 * @param room
+	 * @throws RobotException
+	 */
+	public void placeRobot(Room room) throws RobotException {
+		this.room = room;
+		this.row = room.flipRow(row);
+		controlCoordonate(this.row, this.col);
+		System.out.println("Robot is placed at row : " + row + ", col : " + col + " : " + room.getField(row, col));
 	}
-		
-	public void setGoal(Room room,String[] goal) throws NumberFormatException, RobotException
-	{
+
+	/**
+	 * Set the goal in the room. According to the statement, the coordonate of
+	 * the goal is (7,7), so in a grid it's will be on the bottom right.
+	 * Therefore it must be placed at bottom left. So I flip the row of the
+	 * goal.
+	 * 
+	 * @param room
+	 * @param goal
+	 * @throws NumberFormatException
+	 * @throws RobotException
+	 */
+	public void setGoal(Room room, String[] goal) throws NumberFormatException, RobotException {
 		this.room = room;
 		this.goal = new int[2];
 		this.goal[0] = room.flipRow(Integer.parseInt(goal[0]));
-		this.goal[1] = Integer.parseInt(goal[1]);	
-		controlCoordonate(this.goal[0],this.goal[1]);
+		this.goal[1] = Integer.parseInt(goal[1]);
+		controlCoordonate(this.goal[0], this.goal[1]);
+		System.out.println("Goal is placed at row : " + this.goal[0] + ", col : " + this.goal[1] + " : "
+				+ room.getField(row, col));
 	}
-	
-	public void displayRoom()
-	{
+
+	/**
+	 * Display the Room. I choose to represent the Robot with arrow, the goal
+	 * with a G, the obstacle with a X, the peeble/traject of the robot with a
+	 * M. OtherWise, the fields of the room is displayed by their original char.
+	 */
+	public void displayRoom() {
 		System.out.println();
 		System.out.println("Room:");
-		for(int i = 0; i<room.getNbRows(); i++)
-		{
-			for(int j=0; j< room.getNbCols();j++)
-			{
-				if(i==row && j==col) 
-					{
-					switch (direction) {
-						case NORTH:
-							System.out.print("^");
-							break;
-						case EAST:
-							System.out.print(">");
-							break;
-						case SOUTH:
-							System.out.print("v");
-							break;
-						case WEST:
-							System.out.print("<");
-							break;
-						default:
-							System.out.print("R");
-							break;
-						}			
+		for (int i = 0; i < room.getNbRows(); i++) {
+			for (int j = 0; j < room.getNbCols(); j++) {
+				if (i == row && j == col) {
+					switch (directionEnum) {
+					case NORTH:
+						System.out.print("^");
+						break;
+					case EAST:
+						System.out.print(">");
+						break;
+					case SOUTH:
+						System.out.print("v");
+						break;
+					case WEST:
+						System.out.print("<");
+						break;
+					default:
+						System.out.print("R");
+						break;
 					}
-				else if(goal != null && i==goal[0] && j==goal[1]) System.out.print("G");
-				else if(room.getField(i,j).isBlocked()) System.out.print("X");
-				else if(room.getField(i,j).isMarked()) System.out.print("M");
-				else System.out.print(room.getField(i,j));
-				
+				} else if (goal != null && i == goal[0] && j == goal[1])
+					System.out.print("G");
+				else if (room.getField(i, j).isBlocked())
+					System.out.print("X");
+				else if (room.getField(i, j).isMarked())
+					System.out.print("M");
+				else
+					System.out.print(room.getField(i, j));
 			}
 			System.out.println("");
 		}
 		System.out.println();
 	}
-	
-	public void displayRoute(){
+
+	public void displayRoute() {
 		ListIterator<String> iterator = getRoute().listIterator();
-		while(iterator.hasNext()){
-			   String item = iterator.next();
-			   System.out.print(item);
-			}
-			
-	}
-	
-	protected void move() {
-		if(detectWallOrObstacle()){
-			int nextRow=row;
-			int nextCol=col;
-			switch (direction) {
-			case NORTH:
-				nextRow--;
-				break;
-			case EAST:
-				nextCol++;
-				break;
-			case SOUTH:
-				nextRow++;
-				break;
-			case WEST:
-				nextCol--;
-				break;
-			default:
-				nextRow--;
-				break;
-			}			
-	        row = nextRow;
-	        col = nextCol;
-	        route.push("F");
-		}       
-    }
-	
-	protected void move(String nextdirection) {
-		rotate(nextdirection);
-		move();       
-    }
-	
-	protected void rotateLeft() {
-		switch (direction) {
-		case NORTH:
-			this.direction = WEST;
-			break;
-		case EAST:
-			this.direction = NORTH;
-			break;
-		case SOUTH:
-			this.direction = EAST;
-			break;
-		case WEST:
-			this.direction = SOUTH;
-			break;
-		default:
-			this.direction = NORTH;
-			break;
-		}
-		route.push("L");
-	}
-	
-	protected void rotateRight() {
-		switch (direction) {
-		case NORTH:
-			this.direction = EAST;
-			break;
-		case EAST:
-			this.direction = SOUTH;
-			break;
-		case SOUTH:
-			this.direction = WEST;
-			break;
-		case WEST:
-			this.direction = NORTH;
-			break;
-		default:
-			this.direction = NORTH;
-			break;
-		}
-		route.push("R");
-	}
-	
-	protected void rotate(String direction){
-		switch (this.direction) {
-		case NORTH:
-			switch (direction) {
-			case EAST:
-				rotateRight();
-				break;
-			case SOUTH:
-				rotateRight();
-				rotateRight();
-				break;
-			case WEST:
-				rotateLeft();
-				break;
-			default:
-				break;
-			}
-			break;
-		case EAST:
-			switch (direction) {
-			case NORTH:
-				rotateLeft();
-				break;
-			case SOUTH:
-				rotateRight();
-				break;
-			case WEST:
-				rotateLeft();
-				rotateLeft();
-				break;
-			default:
-				break;
-			}
-			break;
-		case SOUTH:
-			switch (direction) {
-			case NORTH:
-				rotateRight();
-				rotateRight();
-				break;
-			case EAST:
-				rotateLeft();
-				break;
-			case WEST:
-				rotateRight();
-				break;
-			default:
-				break;
-			}
-			break;
-		case WEST:
-			switch (direction) {
-			case NORTH:
-				rotateRight();
-				break;
-			case EAST:
-				rotateRight();
-				rotateRight();
-				break;
-			case SOUTH:
-				rotateLeft();
-				break;
-			default:
-				break;
-			}
-			break;
-		default:
-			break;
+		while (iterator.hasNext()) {
+			String item = iterator.next();
+			System.out.print(item);
 		}
 	}
 	
-	protected boolean checkGoal(){
-		if(goal != null && this.row==this.goal[0] && this.col==this.goal[1])
-        {
-        	return true;
-        }
-		return false;
+	public String getRouteAsString() {
+		StringBuffer route = new StringBuffer();
+		ListIterator<String> iterator = getRoute().listIterator();
+		while (iterator.hasNext()) {
+			route.append(iterator.next());
+		}
+		return route.toString();
 	}
 	
-	protected boolean checkGoal(int row,int col){
-		if(goal != null && row==this.goal[0] && col==this.goal[1])
-        {
-        	return true;
-        }
-		return false;
+	public boolean navigate()throws InterruptedException {
+		return this.navigate(this.row,this.col,this.directionEnum);
 	}
-	
-	protected boolean checkMarked(){
-		if(room.getField(row, col).isMarked())
-        {
-        	return true;
-        }
-		return false;
-	}
-	
-	protected void setMarked(boolean mark){
-		room.getField(row, col).setMarked(mark);
-	}
-	
-	protected boolean detectWallOrObstacle() {
-		int nextX=row;
-		int nextY=col;
-		if(this.direction.equals(NORTH)) nextX--;
-		else if(direction.equals(EAST)) nextY++;
-		else if(direction.equals(SOUTH)) nextX++;
-		else if(direction.equals(WEST)) nextY--;
+	/**
+	 * Recursive function: 
+	 * The function that at a given point tries all	 * possibilities (left, right, up, down),
+	 * leaving a mark to avoid looping to infinity in the labyrinth. 
+	 * If we find a pebble or a wall we abandon and return to the previous situation from which we try another choice.
+	 * 
+	 * @param row
+	 * @param col
+	 * @param direction
+	 * @return true is a path is found, or else false
+	 * @throws InterruptedException
+	 */
+	protected boolean navigate(int row, int col, Direction direction) throws InterruptedException {
 		
-        if(nextX>=0 && nextX< room.getNbRows() && nextY>=0 && nextY<room.getNbCols())
-        {
-        	if(!room.getField(row,col).isBlocked())
-        	{
-        		return true;
-        	}
-        }
-        return false;
-    }
-	
-	protected boolean detectWallOrObstacle(String direction) {
-		int nextX=row;
-		int nextY=col;
-		if(direction.equals(NORTH)) nextX--;
-		else if(direction.equals(EAST)) nextY++;
-		else if(direction.equals(SOUTH)) nextX++;
-		else if(direction.equals(WEST)) nextY--;
-		
-        if(nextX>=0 && nextX< room.getNbRows() && nextY>=0 && nextY<room.getNbCols())
-        {
-        	if(!room.getField(row,col).isBlocked())
-        	{
-        		return true;
-        	}
-        }
-        return false;
-    }
-	
+		// Move to the next case, if it is different than the current.
+		if (this.row != row || this.col != col) move(direction);
 
-	public boolean navigate(int row,int col,String direction) throws InterruptedException {
-		
-
-		// If we are outside of the room, we return false.
-		if(!detectWallOrObstacle(direction))return false;
-
-		if(this.row != row || this.col != col)
-		{
-			move(direction);
-		}
-		
 		// The goal is found , we return true.
-		if (checkGoal(row,col)) return true;
-	
-		// Si on tombe sur un mur ou un caillou, on revient sur nos pas.
-		// On revient sur nos pas en disant, par là c'est pas bon!
+		if (checkGoal(row, col)) return true;
+			
+		// If this case is marked, return false.
 		if (checkMarked()) return false;
 
-	    // Ok, pas mur ni caillou, alors on laisse tomber un caillou
+		// Case clean, unexplore, we pose a mark.
 		setMarked(true);
-	    // On affiche l'état courant du parcours
-	    displayRoom();
-	    if(row>this.getGoal()[0] && (row-1)>=0 && room.getField(row-1, col).isNotBlockedOrMarked())
-	    {
-	    	// Try North
-	        if (navigate(row-1,col,Robot.NORTH)) { 
-	        	//move(row-1,col,Robot.NORTH); 
-	        	return true; }
-	    }else if(row+1>room.getNbCols() && room.getField(row+1,col).isNotBlockedOrMarked()){
-	    	// Try south
-	        if (navigate(row+1,col,Robot.SOUTH)) { 
-	        	//move(row+1,col,Robot.SOUTH);  
-	        	return true; }
-	    }
-	    if(col<this.getGoal()[1] && (col+1)<room.getNbRows() && room.getField(row,col+1).isNotBlockedOrMarked()){
-	    	// Try east
-	        if (navigate(row,col+1,Robot.EAST)) { 
-	        	//move(row,col+1,Robot.EAST); 
-	        	return true; }
-	    }else if(col-1>=0 && room.getField(row,col-1).isNotBlockedOrMarked()){
-	    	// Try west
-	        if (navigate(row,col-1,Robot.WEST)) { 
-	        	//move(row,col-1,Robot.WEST);
-	        	return true; }
-	    }
-	    
-	    // Rien n'a fonctionné à partir d'ici, enlevons le caillou et
-	    // revenons sur nos pas...
-	    setMarked(false);
-	    displayRoom();
-	    return false;
-	  }
-	
-	private void controlCoordonate(int row, int col) throws RobotException
-	{
-		if(col> room.getNbCols()-1 )
-		{
-			throw new RobotException("Coordonate out of the room Y :"+ col +" Room nbCols : " + room.getNbCols());
-			
+		// Display the room
+		displayRoom();
+		if (row > this.getGoal()[0] && (row - 1) >= 0 && room.getField(row - 1, col).isNotBlockedOrMarked()) {
+			// Try North
+			if (navigate(row - 1, col, Direction.NORTH)) return true;
+		} else if (row + 1 > room.getNbCols() && room.getField(row + 1, col).isNotBlockedOrMarked()) {
+			// Try south
+			if (navigate(row + 1, col, Direction.SOUTH)) return true;
 		}
-		if(row > room.getNbRows()-1)
-		{
-			throw new RobotException("Coordonate out of the room X : "+ row +" Room nbRows : " + room.getNbRows());
+		if (col < this.getGoal()[1] && (col + 1) < room.getNbRows() && room.getField(row, col + 1).isNotBlockedOrMarked()) {
+			// Try east
+			if (navigate(row, col + 1, Direction.EAST)) return true;
+		} else if (col - 1 >= 0 && room.getField(row, col - 1).isNotBlockedOrMarked()) {
+			// Try west
+			if (navigate(row, col - 1, Direction.WEST)) return true;
 		}
-		if(room.getField(row,col).isBlocked())
-		{
-			throw new RobotException("Robot or goal can't be place here, there is a obstacle");
+
+		// No way, we remove the mark and try another path.
+		setMarked(false);
+		displayRoom();
+		return false;
+	}
+
+	protected void move() {
+		if (detectWallOrObstacle(this.directionEnum)) {
+			switch (directionEnum) {
+			case NORTH:
+				row--;
+				break;
+			case EAST:
+				col++;
+				break;
+			case SOUTH:
+				row++;
+				break;
+			case WEST:
+				col--;
+				break;
+			default:
+				row--;
+				break;
+			}
+			route.push("F");
+		}
+	}
+
+	protected void move(Direction nextdirection) {
+		rotate(nextdirection);
+		move();
+	}
+
+	protected void rotateLeft() {
+		this.directionEnum = directionEnum.getLeftDirection();
+		route.push("L");
+	}
+
+	protected void rotateRight() {
+		this.directionEnum = directionEnum.getRightDirection();
+		route.push("R");
+	}
+
+	protected void rotate(Direction direction) {
+		switch (this.directionEnum) {
+		case NORTH:
+			switch (direction) {
+			case EAST:
+				rotateRight();
+				break;
+			case SOUTH:
+				rotateRight();
+				rotateRight();
+				break;
+			case WEST:
+				rotateLeft();
+				break;
+			default:
+				break;
+			}
+			break;
+		case EAST:
+			switch (direction) {
+			case NORTH:
+				rotateLeft();
+				break;
+			case SOUTH:
+				rotateRight();
+				break;
+			case WEST:
+				rotateLeft();
+				rotateLeft();
+				break;
+			default:
+				break;
+			}
+			break;
+		case SOUTH:
+			switch (direction) {
+			case NORTH:
+				rotateRight();
+				rotateRight();
+				break;
+			case EAST:
+				rotateLeft();
+				break;
+			case WEST:
+				rotateRight();
+				break;
+			default:
+				break;
+			}
+			break;
+		case WEST:
+			switch (direction) {
+			case NORTH:
+				rotateRight();
+				break;
+			case EAST:
+				rotateRight();
+				rotateRight();
+				break;
+			case SOUTH:
+				rotateLeft();
+				break;
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
 		}
 	}
 	
-	public int getCol() {
+	private void controlCoordonate(int row, int col) throws RobotException {
+		if (col > room.getNbCols() - 1)
+			throw new RobotException("Coordonate out of the room Y :" + col + " Room nbCols : " + room.getNbCols());
+		if (row > room.getNbRows() - 1)
+			throw new RobotException("Coordonate out of the room X : " + row + " Room nbRows : " + room.getNbRows());
+		if (room.getField(row, col).isBlocked())
+			throw new RobotException("Robot or goal can't be place here, there is a obstacle");
+	}
+
+	protected boolean checkGoal(int row, int col) {
+		if (goal != null && row == this.goal[0] && col == this.goal[1]) {
+			return true;
+		}
+		return false;
+	}
+	
+	protected boolean detectWallOrObstacle(Direction direction) {
+		int nextRow = row;
+		int nextCol = col;
+		switch (directionEnum) {
+		case NORTH:
+			nextRow--;
+			break;
+		case EAST:
+			nextCol++;
+			break;
+		case SOUTH:
+			nextRow++;
+			break;
+		case WEST:
+			nextCol--;
+			break;
+		default:
+			nextRow--;
+			break;
+		}
+		if (nextRow >= 0 && nextRow < room.getNbRows() && nextCol >= 0 && nextCol < room.getNbCols()) {
+			if (room.getField(nextRow, nextCol).isNotBlocked())
+				return true;
+		}
+		return false;
+	}
+
+	protected boolean checkMarked() {
+		if (room.getField(row, col).isMarked())
+			return true;
+		return false;
+	}
+
+	protected void setMarked(boolean mark) {
+		room.getField(row, col).setMarked(mark);
+	}
+
+	protected int getCol() {
 		return col;
 	}
 
-	public int getRow() {
+	protected int getRow() {
 		return row;
 	}
 
-	public String getDirection() {
-		return direction;
+	protected String getDirection() {
+		return directionEnum.name();
 	}
 
-	public int[] getGoal() {
+	protected Direction getDirectionEnum() {
+		return directionEnum;
+	}
+
+	protected int[] getGoal() {
 		return goal;
 	}
 
-	public Room getRoom() {
-		return room;
-	}
-
-	public Stack<String> getRoute() {
+	protected Stack<String> getRoute() {
 		return route;
 	}
+
 }

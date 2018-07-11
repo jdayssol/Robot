@@ -1,5 +1,11 @@
 package com.otto.ottorobot;
 
+/**
+ * Represents the Room / the Maze.
+ * 
+ * @author jdayssol
+ *
+ */
 public class Room {
 	private int nbRows;
 	private int nbCols;
@@ -20,35 +26,19 @@ public class Room {
 		}
 		this.fields = fields;
 	}
-	
-	public Room(int nrows, int ncols, Field[][] tiles) {
-		this.nbRows = nrows;
-		this.nbCols = ncols;
-		this.fields = tiles;
-	}
 
 	public Field getField(int row, int col) {
 		return fields[row][col];
 	}
 
 	public int flipCol(int col) throws RobotException {
-		if(col > this.getNbCols()-1)
-		{
-			throw new RobotException("Coordonate out of the room Y : "+ col +" Room nbCols : " + this.getNbCols());
-		}
+		if(col > this.getNbCols()-1) throw new RobotException("Coordonate out of the room Y : "+ col +" Room nbCols : " + this.getNbCols());
 		return this.nbCols - 1 - col;
 	}
 
 	public int flipRow(int row) throws RobotException {
-		if(row > this.getNbRows()-1)
-		{
-			throw new RobotException("Coordonate out of the room X : "+ row +" Room nbRows : " + this.getNbRows());
-		}
+		if(row > this.getNbRows()-1) throw new RobotException("Coordonate out of the room X : "+ row +" Room nbRows : " + this.getNbRows());
 		return this.nbRows - 1 - row;
-	}
-
-	public Field[][] getFields() {
-		return fields;
 	}
 
 	public int getNbRows() {
