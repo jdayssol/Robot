@@ -18,9 +18,9 @@ public class Room {
 		for (int i = 0; i < nbRows; i++) {
 			for (int j = 0; j < nbCols; j++) {				
 				if(room[i][j].equals("X")){
-					fields[i][j] = new Field(room[i][j],true);
+					fields[i][j] = new Field(room[i][j],true,i,j);
 				}else{
-					fields[i][j] = new Field(room[i][j],false);
+					fields[i][j] = new Field(room[i][j],false,i,j);
 				}
 			}
 		}
@@ -28,7 +28,11 @@ public class Room {
 	}
 
 	public Field getField(int row, int col) {
-		return fields[row][col];
+		if(row < 0 || col < 0 || row >= nbRows || col >= nbCols){
+			return null;
+		}else{
+			return fields[row][col];
+		}		
 	}
 
 	public int flipCol(int col) throws RobotException {

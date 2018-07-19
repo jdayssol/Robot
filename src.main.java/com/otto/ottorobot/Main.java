@@ -1,5 +1,6 @@
 package com.otto.ottorobot;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -48,10 +49,13 @@ public class Main {
 			myrobot.placeRobot(myroom);
 			myrobot.setGoal(myroom, goal);
 			myrobot.displayRoom();
-			if (myrobot.navigate()) {
-				System.out.println("Robot path is:");
-				myrobot.displayRoute();
-			} else {
+			
+			List<Field> solution = myrobot.breadthFirstSearch();
+			if(!solution.isEmpty())
+			{
+			System.out.println("Robot path is:");
+			myrobot.printPath(solution);	
+			}else{
 				System.out.println("No path exists");
 			}
 		} catch (Exception e) {

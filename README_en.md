@@ -51,7 +51,7 @@ The final position is in the upper right corner of the room:
 
 ### Output
 `FFRFLFFLFRFFRFFFFFFFLF`
-
+ 
 
 ## Rules
 * You should complete this task in less than 3 days.

@@ -1,5 +1,7 @@
 package com.otto.ottorobot;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +31,7 @@ public class RobotTest{
 	
 
 	public void runTest() throws NumberFormatException, RobotException, InterruptedException {
-		navigate();
+		breadthFirstSearch();
     }
 	
 	@Test
@@ -297,9 +299,9 @@ public class RobotTest{
 		
 		myrobot.displayRoute();
 	}
-	
+	/*
 	@Test
-    public void navigateSmallRoom() throws NumberFormatException, RobotException, InterruptedException {	
+    public void depthFirstSearchSmallRoom() throws NumberFormatException, RobotException, InterruptedException {	
 		Robot myrobot = new Robot(0,0,"NORTH");
 		String[][] room ={
 		{"X","O"},
@@ -312,17 +314,69 @@ public class RobotTest{
 		myrobot.setGoal(myroom, goal);
 		
 		myrobot.displayRoom();
-		if(myrobot.navigate(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
+		if(myrobot.depthFirstSearch(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
 			System.out.println("a way is found");
+			myrobot.displayRoom();
 			myrobot.displayRoute();
 		}else{
 			System.out.println("No way to goal exist");
 		}
 		Assert.assertEquals("RFLF",myrobot.getRouteAsString());
 	}
+	*/
+	/*
+	@Test
+    public void depthFirstSearchSmallRoom2() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(1,1,"NORTH");
+		String[][] room ={
+		{"O","O"},
+		{"O","X"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"0","0"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		
+		myrobot.displayRoom();
+		if(myrobot.depthFirstSearch(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
+			System.out.println("a way is found");
+			myrobot.displayRoom();
+			myrobot.displayRoute();
+		}else{
+			System.out.println("No way to goal exist");
+		}
+		Assert.assertEquals("RFLF",myrobot.getRouteAsString());
+	}
+*/
+	@Test
+    public void breadthFirstSearchSmallRoom() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(0,0,"NORTH");
+		String[][] room ={
+		{"X","O"},
+		{"O","O"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"1","1"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		
+		myrobot.displayRoom();
+		List<Field> solution = myrobot.breadthFirstSearch();
+		if(!solution.isEmpty())
+		{
+		System.out.println("a way is found");
+		myrobot.printPath(solution);	
+		}else{
+			System.out.println("No way exists");
+		}
+					
+		Assert.assertEquals(false,solution.isEmpty());
+	}
 	
 	@Test
-    public void navigate() throws NumberFormatException, RobotException, InterruptedException {	
+    public void breadthFirstSearch() throws NumberFormatException, RobotException, InterruptedException {	
 		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
 
 		String[][] room ={
@@ -344,18 +398,116 @@ public class RobotTest{
 		Assert.assertEquals(0,myrobot.getCol());
 		
 		myrobot.setGoal(myroom, goal);
-		if(myrobot.navigate(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
-			System.out.println("A way is found");
-			myrobot.displayRoute();
+		myrobot.displayRoom();
+		List<Field> solution = myrobot.breadthFirstSearch();
+		if(!solution.isEmpty())
+		{
+		System.out.println("a way is found");
+		myrobot.printPath(solution);	
 		}else{
-			myrobot.getRoute().clear();
 			System.out.println("No way exists");
 		}
-		Assert.assertEquals("FFRFLFFLFRFFFRFFFFFFF", myrobot.getRouteAsString());
+					
+		Assert.assertEquals(false,solution.isEmpty());
+	}
+	/*
+	@Test
+    public void depthFirstSearch() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(0,0,"NORTH");
+		String[][] room ={
+				{"O","O","O","O","O","O","O","O"},
+				{"O","O","O","O","O","O","O","O"},
+				{"O","X","X","O","O","O","O","O"},
+				{"O","O","X","O","O","O","O","O"},
+				{"X","O","X","O","O","O","O","O"},
+				{"O","O","X","O","O","O","O","O"},
+				{"O","O","X","O","O","O","O","O"},
+				{"O","O","X","O","O","O","O","O"}};
+				
+				Room myroom = new Room(room);
+				String[] goal = {"7","7"};
+				myrobot.placeRobot(myroom);
+		
+		myrobot.displayRoom();
+		if(myrobot.depthFirstSearch(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
+			System.out.println("a way is found");
+			myrobot.displayRoom();
+			myrobot.displayRoute();
+		}else{
+			System.out.println("No way to goal exist");
+		}
+		Assert.assertEquals(false,myrobot.getRouteAsString());
+	}
+	*/
+	@Test
+    public void breadthFirstSearchComplex() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
+
+		String[][] room ={
+		{"O","O","O","O","X","O","O","O"},
+		{"O","X","O","O","X","O","O","O"},
+		{"O","X","X","O","X","O","O","O"},
+		{"O","O","X","O","X","O","O","O"},
+		{"X","O","X","O","X","O","O","O"},
+		{"O","O","X","O","X","O","X","O"},
+		{"O","O","X","O","X","X","X","O"},
+		{"O","O","X","O","O","O","O","O"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"5","5"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		
+		myrobot.displayRoom();
+		List<Field> solution = myrobot.breadthFirstSearch();
+		if(!solution.isEmpty())
+		{
+		System.out.println("a way is found");
+		myrobot.printPath(solution);	
+		}else{
+			System.out.println("No way exists");
+		}
+					
+		Assert.assertEquals(false,solution.isEmpty());
 	}
 	
+	
 	@Test
-    public void navigateNoSolution() throws NumberFormatException, RobotException, InterruptedException {	
+    public void breadthFirstSearchComplex2() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
+
+		String[][] room ={
+				{"O","X","O","O","O","O","O","O"},
+				{"O","X","O","O","O","O","X","O"},
+				{"O","X","X","O","O","O","X","O"},
+				{"O","O","X","O","O","O","X","O"},
+				{"X","O","X","X","X","X","X","O"},
+				{"O","O","O","O","O","O","O","O"},
+				{"O","O","X","O","O","O","O","O"},
+				{"O","O","X","O","O","O","O","O"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"5","5"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		
+		myrobot.displayRoom();
+		List<Field> solution = myrobot.breadthFirstSearch();
+		if(!solution.isEmpty())
+		{
+		System.out.println("a way is found");
+		myrobot.printPath(solution);	
+		}else{
+			System.out.println("No way exists");
+		}
+					
+		Assert.assertEquals(false,solution.isEmpty());
+	}
+
+	@Test
+    public void breadthFirstSearchComplexNoSolution() throws NumberFormatException, RobotException, InterruptedException {	
 		Robot myrobot = new Robot(Integer.parseInt(robotPosition[0]),Integer.parseInt(robotPosition[1]), robotPosition[2]);
 
 		String[][] room ={
@@ -377,13 +529,67 @@ public class RobotTest{
 		Assert.assertEquals(0,myrobot.getCol());
 		
 		myrobot.setGoal(myroom, goal);
-		if(myrobot.navigate(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
-			System.out.println("A way is found");
-			myrobot.displayRoute();
+		myrobot.displayRoom();
+		List<Field> solution = myrobot.breadthFirstSearch();
+		if(!solution.isEmpty())
+		{
+		System.out.println("a way is found");
+		myrobot.printPath(solution);	
 		}else{
-			myrobot.getRoute().clear();
 			System.out.println("No way exists");
 		}
-		Assert.assertEquals("", myrobot.getRouteAsString());
+					
+		Assert.assertEquals(true,solution.isEmpty());
 	}
+
+
+	@Test
+	public void depthFirstSearchSmallRoom3() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(0,0,"NORTH");
+		String[][] room ={
+		{"X","O"},
+		{"O","O"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"1","1"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		
+		myrobot.displayRoom();
+		if(myrobot.depthFirstSearch(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
+			System.out.println("a way is found");
+			myrobot.displayRoom();
+			myrobot.displayRoute();
+		}else{
+			System.out.println("No way to goal exist");
+		}
+		Assert.assertEquals("RFLF",myrobot.getRouteAsString());
+	}
+
+
+	@Test
+	public void depthFirstSearchSmallRoom4() throws NumberFormatException, RobotException, InterruptedException {	
+		Robot myrobot = new Robot(1,1,"NORTH");
+		String[][] room ={
+		{"O","O"},
+		{"O","X"}};
+		
+		Room myroom = new Room(room);
+		String[] goal = {"0","0"};
+		
+		myrobot.placeRobot(myroom);
+		myrobot.setGoal(myroom, goal);
+		
+		myrobot.displayRoom();
+		if(myrobot.depthFirstSearch(myrobot.getRow(), myrobot.getCol(),myrobot.getDirectionEnum())){
+			System.out.println("a way is found");
+			myrobot.displayRoom();
+			myrobot.displayRoute();
+		}else{
+			System.out.println("No way to goal exist");
+		}
+		Assert.assertEquals("LFLF",myrobot.getRouteAsString());
+	}
+	
 }

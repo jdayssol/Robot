@@ -12,11 +12,20 @@ public class Field {
 	private boolean isBlocked = false;
 	private boolean isMarked = false;
 
-	public Field(String content, boolean isBlocked) {
+	private int row;
+	private int col;
+	
+	private Field parent;
+	
+	public Field(String content, boolean isBlocked, int row, int col) {
 		super();
 		this.content = content;
 		this.isBlocked = isBlocked;
+		this.row = row;
+		this.col = col;
 	}
+	
+	
 
 	public boolean isNotBlockedOrMarked() {
 		if (!isBlocked && !isMarked)
@@ -48,4 +57,30 @@ public class Field {
 	public boolean isNotBlocked() {
 		return !isBlocked;
 	}
+	
+	public void setContent(String content){
+		this.content = content;
+	}
+
+	public int getRow() {
+		return row;
+	}
+
+
+	public int getCol() {
+		return col;
+	}
+
+
+
+	public Field getParent() {
+		return parent;
+	}
+
+
+
+	public void setParent(Field parent) {
+		this.parent = parent;
+	}
+
 }

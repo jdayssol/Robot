@@ -1,5 +1,9 @@
 package com.otto.ottorobot;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Stack;
 
@@ -123,7 +127,7 @@ public class Robot {
 			System.out.print(item);
 		}
 	}
-	
+
 	public void displayRouteInverse() {
 		ListIterator<String> iterator = getRoute().listIterator(getRoute().size());
 		while (iterator.hasPrevious()) {
@@ -131,7 +135,7 @@ public class Robot {
 			System.out.print(item);
 		}
 	}
-	
+
 	public String getRouteAsString() {
 		StringBuffer route = new StringBuffer();
 		ListIterator<String> iterator = getRoute().listIterator();
@@ -140,68 +144,164 @@ public class Robot {
 		}
 		return route.toString();
 	}
-	
-	public boolean navigate()throws InterruptedException {
-		return this.navigate(this.row,this.col,this.directionEnum);
+
+	public void navigate() throws InterruptedException {
+		this.breadthFirstSearch();
 	}
+
 	/**
-	 * Recursive function: 
-	 * The function that at a given point tries all	 * possibilities (left, right, up, down),
-	 * leaving a mark to avoid looping to infinity in the labyrinth. 
-	 * If we find a pebble or a wall we abandon and return to the previous situation from which we try another choice.
+	 * Recursive function: The function that at a given point tries all *
+	 * possibilities (left, right, up, down), If we’re at the wall or an already
+	 * visited node, return failure Else if we’re the exit node, then return
+	 * success Else, add the node in path list and recursively travel in all
+	 * four directions. If failure is returned, remove the node from the path
+	 * and return failure. Path list will contain a unique path when exit is
+	 * found
 	 *
-	 * @param row
-	 * @param col
+	 * @param nextrow
+	 * @param nextcol
 	 * @param direction
 	 * @return true is a path is found, or else false
 	 * @throws InterruptedException
 	 */
-	
-	protected boolean navigate(int row, int col, Direction direction) throws InterruptedException {
 
-		// Move to the next case, if it is different than the current.
-		if (this.row != row || this.col != col) {
+	protected boolean depthFirstSearch(int nextrow, int nextcol, Direction direction) throws InterruptedException {
+		if (nextrow < 0 || nextrow >= room.getNbRows() || nextcol < 0 || nextcol >= room.getNbCols()
+				|| room.getField(nextrow, nextcol).isBlocked() || room.getField(nextrow, nextcol).isMarked()) {
+			return false;
+		} else if (nextrow != this.row || nextcol != this.col) {
 			move(direction);
 		}
-				
-		// If this case is marked, return false.
-		if (checkMarked())
-			{
-			return false;
-			}
-		
-		// If this case is marked, return false.
-		if (row <0 || row < 0 || row> (this.room.getNbRows()-1) || col >(this.room.getNbCols()-1))
-			{
-			return false;
-			}
-				
-		setMarked(true);
+
+		setMarked(nextrow, nextcol, true);
 
 		// The goal is found , we return true.
-		if (checkGoal(row, col)){
+		if (checkGoal(nextrow, nextcol)) {
 			return true;
 		}
-		if (row > this.getGoal()[0] && (row - 1) >= 0 && room.getField(row - 1, col).isNotBlockedOrMarked()) {
-			// Try North
-			if (navigate(row - 1, col, Direction.NORTH)) return true;
-		} else if (row + 1 > room.getNbCols() && room.getField(row + 1, col).isNotBlockedOrMarked()) {
-			// Try south
-			if (navigate(row + 1, col, Direction.SOUTH)) return true;
-		}
-		if (col < this.getGoal()[1] && (col + 1) < room.getNbRows() && room.getField(row, col + 1).isNotBlockedOrMarked()) {
-			// Try east
-			if (navigate(row, col + 1, Direction.EAST)) return true;
-		} else if (col - 1 >= 0 && room.getField(row, col - 1).isNotBlockedOrMarked()) {
-			// Try west
-			if (navigate(row, col - 1, Direction.WEST)) return true;
-		}
 
-		// No way, we remove the mark and try another path.
-		setMarked(false);
+		if (depthFirstSearch(nextrow - 1, nextcol, Direction.NORTH))
+			return true;
+		if (depthFirstSearch(nextrow, nextcol + 1, Direction.EAST))
+			return true;
+		if (depthFirstSearch(nextrow + 1, nextcol, Direction.SOUTH))
+			return true;
+		if (depthFirstSearch(nextrow, nextcol - 1, Direction.WEST))
+			return true;
+
 		return false;
 	}
-		
+
+	/**
+	 * Not-Recursive function
+	 *
+	 * one child and all its grandchildren were explored first, before moving on
+	 * to another child. Whereas in BFS, we’ll explore all the immediate
+	 * children before moving on to the grandchildren. This will ensure that all
+	 * nodes at a particular distance from the parent node, are explored at the
+	 * same time. The algorithm can be outlined as follows: Add the starting
+	 * node in queue While the queue is not empty, pop a node, do following: If
+	 * we reach the wall or the node is already visited, skip to next iteration
+	 * If exit node is reached, backtrack from current node till start node to
+	 * find the shortest path Else, add all immediate neighbors in the four
+	 * directions in queue One important thing here is that the nodes must keep
+	 * track of their parent, i.e. from where they were added to the queue. This
+	 * is important to find the path once exit node is encountered.
+	 * 
+	 * @return
+	 */
+	public List<Field> breadthFirstSearch() {
+		LinkedList<Field> nextToVisit = new LinkedList<>();
+		Field start = this.room.getField(this.row, this.col);
+		start.setContent("S");
+		nextToVisit.add(start);
+
+		while (!nextToVisit.isEmpty()) {
+			Field cur = nextToVisit.remove();
+
+			if (cur.getRow() < 0 || cur.getRow() >= room.getNbRows() || cur.getCol() < 0
+					|| cur.getCol() >= room.getNbCols() || room.getField(cur.getRow(), cur.getCol()).isBlocked()
+					|| room.getField(cur.getRow(), cur.getCol()).isMarked()) {
+				continue;
+			}
+
+			if (checkGoal(cur.getRow(), cur.getCol())) {
+				return backtrackPath(cur);
+			}
+			for (Direction dir : Direction.values()) {
+				Field nextfield = null;
+
+				if (dir == Direction.NORTH) {
+					nextfield = room.getField(cur.getRow() - 1, cur.getCol());
+				}
+				if (dir == Direction.EAST) {
+					nextfield = room.getField(cur.getRow(), cur.getCol() + 1);
+				}
+				if (dir == Direction.SOUTH) {
+					nextfield = room.getField(cur.getRow() + 1, cur.getCol());
+				}
+				if (dir == Direction.WEST) {
+					nextfield = room.getField(cur.getRow(), cur.getCol() - 1);
+				}
+				if (nextfield != null && nextfield.isNotBlockedOrMarked()) {
+					nextfield.setParent(cur);
+					nextToVisit.add(nextfield);
+				}
+			}
+			cur.setMarked(true);
+		}
+		return Collections.emptyList();
+	}
+
+	public void printPath(List<Field> path) {
+		System.out.println();
+		System.out.println("The path is:");
+		for (int i = 0; i < room.getNbRows(); i++) {
+			for (int j = 0; j < room.getNbCols(); j++) {
+				if (goal != null && i == goal[0] && j == goal[1])
+					System.out.print("G");
+				else if (room.getField(i, j).isBlocked())
+					System.out.print("X");
+				else if (path.contains(room.getField(i, j))) {
+					System.out.print("S");
+				} else
+					System.out.print(room.getField(i, j));
+			}
+			System.out.println("");
+		}
+		System.out.println();
+
+		ListIterator<Field> iterator = path.listIterator(path.size());
+		while (iterator.hasPrevious()) {
+			Field nextField = iterator.previous();
+			if (this.row - nextField.getRow() == 1) {
+				move(Direction.NORTH);
+			}
+			if (this.col - nextField.getCol() == -1) {
+				move(Direction.EAST);
+			}
+			if (this.row - nextField.getRow() == -1) {
+				move(Direction.SOUTH);
+			}
+			if (this.col - nextField.getCol() == 1) {
+				move(Direction.WEST);
+			}
+		}
+		displayRoute();
+	}
+
+	private List<Field> backtrackPath(Field cur) {
+		List<Field> path = new ArrayList<>();
+		Field iter = cur;
+
+		while (iter != null) {
+			path.add(iter);
+			iter = iter.getParent();
+		}
+
+		return path;
+	}
+
 	protected void move() {
 		if (detectWallOrObstacle(this.directionEnum)) {
 			switch (directionEnum) {
@@ -221,6 +321,7 @@ public class Robot {
 				row--;
 				break;
 			}
+			this.setPath(this.row, this.col, "R");
 			route.push("F");
 		}
 	}
@@ -310,7 +411,7 @@ public class Robot {
 			break;
 		}
 	}
-	
+
 	private void controlCoordonate(int row, int col) throws RobotException {
 		if (col > room.getNbCols() - 1)
 			throw new RobotException("Coordonate out of the room Y :" + col + " Room nbCols : " + room.getNbCols());
@@ -326,7 +427,7 @@ public class Robot {
 		}
 		return false;
 	}
-	
+
 	protected boolean detectWallOrObstacle(Direction direction) {
 		int nextRow = row;
 		int nextCol = col;
@@ -354,12 +455,12 @@ public class Robot {
 		return false;
 	}
 
-	protected boolean checkMarked(int row,int col) {
+	protected boolean checkMarked(int row, int col) {
 		if (room.getField(row, col).isMarked())
 			return true;
 		return false;
 	}
-	
+
 	protected boolean checkMarked() {
 		if (room.getField(row, col).isMarked())
 			return true;
@@ -368,6 +469,14 @@ public class Robot {
 
 	protected void setMarked(boolean mark) {
 		room.getField(row, col).setMarked(mark);
+	}
+
+	protected void setMarked(int row, int col, boolean mark) {
+		room.getField(row, col).setMarked(mark);
+	}
+
+	protected void setPath(int row, int col, String path) {
+		room.getField(row, col).setContent(path);
 	}
 
 	protected int getCol() {
